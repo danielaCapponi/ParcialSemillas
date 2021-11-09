@@ -1,0 +1,105 @@
+import plantas.*
+import parcelas.*
+
+describe "Menta" {
+
+	test "Una menta de un metro debería dar semillas y ocupar 3m2" {
+		const menta = new Menta(altura = 1, cosecha = 2007)
+		assert.that(menta.daNuevasSemillas())
+		assert.equals(3, menta.metrosOcupados())
+	}
+
+	test "Una menta de 0.3 metros no da semillas y ocupa 0.9m2" {
+		const menta = new Menta(altura = 0.3, cosecha = 2007)
+		assert.notThat(menta.daNuevasSemillas())
+		assert.equals(0.9, menta.metrosOcupados())
+	}
+
+}
+
+describe "Soja" {
+
+	test "Una soja de 0.6m y cosecha 2009 tiene 7hs de tolerancia al sol, no da semillas y ocupa 0.3m2" {
+		const soja = new Soja(altura = 0.6, cosecha = 2009)
+		assert.notThat(soja.daNuevasSemillas())
+		assert.equals(0.3, soja.metrosOcupados())
+		assert.equals(7, soja.cantidadHorasSolQueTolera())
+	}
+
+}
+
+describe "Quinoa" {
+
+	test "Una quinoa que tolera 12hs de sol y es cosecha 2010, da semillas" {
+		const quinoa = new Quinoa(altura = 0.6, cosecha = 2010, horasDeSolQueTolera = 12)
+		assert.that(quinoa.daNuevasSemillas())
+	}
+
+	test "Una quinoa que tolera 9hs de sol y es cosecha 2001, da semillas" {
+		const quinoa = new Quinoa(altura = 0.6, cosecha = 2001, horasDeSolQueTolera = 9)
+		assert.that(quinoa.daNuevasSemillas())
+	}
+
+}
+
+describe "Soja transgénica" {
+
+	test "La soja transgénica nunca da nuevas semillas, sin importar sus características" {
+		const sojaT1 = new SojaTransgenica(altura = 1, cosecha = 2007)
+		const sojaT2 = new SojaTransgenica(altura = 1, cosecha = 2007)
+		const sojaT3 = new SojaTransgenica(altura = 1, cosecha = 2007)
+		assert.notThat(sojaT1.daNuevasSemillas() || sojaT2.daNuevasSemillas() || sojaT3.daNuevasSemillas())
+	}
+
+}
+
+describe "Hierbabuena" {
+
+	test "La hierbabuena ocupa el doble que una menta de mismas características" {
+		const menta = new Menta(altura = 1, cosecha = 2007)
+		const hierbabuena = new Hierbabuena(altura = 1, cosecha = 2007)
+		assert.equals(menta.metrosOcupados() * 2, hierbabuena.metrosOcupados())
+	}
+
+}
+
+describe "Parcelas Ideales" {
+
+	const parcela = new ParcelaEcologica(ancho = 3, largo = 3, horasDeSol = 6)
+	const menta = new Menta(altura = 2, cosecha = 2007)
+	const hierbabuena = new Hierbabuena(altura = 1, cosecha = 2007)
+	const quinoa = new Quinoa(altura = 2, cosecha = 2010, horasDeSolQueTolera = 12)
+	const soja = new Soja(altura = 0.2, cosecha = 2007)
+	const sojaTransgenica = new SojaTransgenica(altura = 0.2, cosecha = 2007)
+
+	test "La menta y la hierbabuena prefieren parcelas con superficie > 6" {
+		assert.that(hierbabuena.esIdeal(parcela))
+		assert.that(menta.esIdeal(parcela))
+	}
+
+	test "La quinoa busca parcelas sin plantas que superen los 1.5" {
+		// La hierbabuena mide 1 metro
+		parcela.plantar(hierbabuena)
+		assert.that(quinoa.esIdeal(parcela))
+		// La menta mide 2 metros
+		parcela.plantar(menta)
+		assert.notThat(quinoa.esIdeal(parcela))
+	}
+
+	test "La soja busca una parcela con exactamente la misma cantidad de horas de sol que tolera" {
+		assert.that(soja.esIdeal(parcela))
+		const nuevaParcela = new ParcelaEcologica(ancho = 3, largo = 3, horasDeSol = 5)
+		assert.notThat(soja.esIdeal(nuevaParcela))
+	}
+
+	test "La soja transgénica solo acepta parcelas con 1 planta" {
+		// planto primer planta
+		parcela.plantar(quinoa)
+		assert.that(sojaTransgenica.esIdeal(parcela))
+		// Planto segunda planta
+		parcela.plantar(quinoa)
+		assert.notThat(sojaTransgenica.esIdeal(parcela))
+	}
+
+}
+

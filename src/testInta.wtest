@@ -1,0 +1,67 @@
+import parcelas.*
+import plantas.*
+import inta.*
+
+describe "Parámetros evaluados por Inta" {
+
+	// Parcelas
+	const parcela = new ParcelaEcologica(ancho = 3, largo = 3, horasDeSol = 6)
+	const parcela2 = new ParcelaIndustrial(ancho = 3, largo = 3, horasDeSol = 6)
+	const parcelaIndustrial = new ParcelaIndustrial(ancho = 3, largo = 3, horasDeSol = 7)
+	const parcelaEcologica = new ParcelaEcologica(ancho = 3, largo = 3, horasDeSol = 7)
+	// Plantas
+	const menta = new Menta(altura = 2, cosecha = 2007)
+	const hierbabuena = new Hierbabuena(altura = 1, cosecha = 2007)
+	const quinoa = new Quinoa(altura = 2, cosecha = 2010, horasDeSolQueTolera = 12)
+	const soja = new Soja(altura = 0.2, cosecha = 2007)
+	const sojaTransgenica = new SojaTransgenica(altura = 0.2, cosecha = 2007)
+
+	method initialize() {
+		inta.agregarParcela(parcela)
+		inta.agregarParcela(parcela2)
+		inta.agregarParcela(parcelaIndustrial)
+		inta.agregarParcela(parcelaEcologica)
+		parcela.plantar(menta)
+		parcela.plantar(hierbabuena)
+		parcela.plantar(quinoa)
+		parcela.plantar(sojaTransgenica)
+		parcela.plantar(soja)
+		parcela2.plantar(menta)
+		parcela2.plantar(sojaTransgenica)
+		parcela2.plantar(soja)
+		parcelaEcologica.plantar(menta)
+		parcelaEcologica.plantar(soja)
+		parcelaIndustrial.plantar(menta)
+		parcelaIndustrial.plantar(soja)
+	}
+
+	test "Una parcela con más de 4 plantas es autosustentable" {
+		assert.that(parcela.esAutosustentable())
+	}
+
+	test "Promedio de plantas por parcela es de 3 inicialmente" {
+		assert.equals(3, inta.promedioDePlantasPorParcela())
+	}
+
+	test "Promedio de plantas por parcela es de 4 si se agrega una planta a cada parcela" {
+		parcela.plantar(menta)
+		parcela2.plantar(menta)
+		parcelaEcologica.plantar(menta)
+		parcelaIndustrial.plantar(menta)
+		assert.equals(4, inta.promedioDePlantasPorParcela())
+	}
+
+	test "parcela es la más autosustentable" {
+		assert.equals(3, parcela.cantidadDePlantasBienAsociadas())
+		assert.equals(60, parcela.porcentajeDePlantasBienAsociadas())
+		assert.equals(0, parcela2.cantidadDePlantasBienAsociadas())
+		assert.equals(0, parcela2.porcentajeDePlantasBienAsociadas())
+		assert.equals(0, parcelaEcologica.cantidadDePlantasBienAsociadas())
+		assert.equals(0, parcelaEcologica.porcentajeDePlantasBienAsociadas())
+		assert.equals(0, parcelaIndustrial.cantidadDePlantasBienAsociadas())
+		assert.equals(0, parcelaIndustrial.porcentajeDePlantasBienAsociadas())
+		assert.equals(inta.parcelaMasAutosustentable(), parcela)
+	}
+
+}
+

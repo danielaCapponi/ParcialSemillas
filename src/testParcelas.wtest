@@ -1,0 +1,81 @@
+import parcelas.*
+import plantas.*
+
+describe "Parcelas" {
+
+	const parcela1 = new ParcelaEcologica(ancho = 20, largo = 1, horasDeSol = 8)
+	const soja = new Soja(altura = 1.5, cosecha = 2007)
+
+	method initialize() {
+		parcela1.plantar(soja)
+		parcela1.plantar(soja)
+		parcela1.plantar(soja)
+		parcela1.plantar(soja)
+	}
+
+	test "parcela1 tiene una superficie de 20m2" {
+		assert.equals(20, parcela1.superficie())
+	}
+
+	test "parcela1 tolera solo 4 plantas" {
+		assert.equals(4, parcela1.cantidadMaximaPlantas())
+	}
+
+	test "parcela1 no tiene complicaciones para 4 plantas de soja de 1m" {
+		assert.notThat(parcela1.tieneComplicaciones())
+	}
+
+	test "parcela1 lanza error si se le intenta agregar una quinta planta" {
+		assert.throwsExceptionWithMessage("Alcanzó la cantidad máxima de plantas", { parcela1.plantar(soja)})
+	}
+
+}
+
+describe "Asociaciones" {
+
+	const parcelaEcologica = new ParcelaEcologica(ancho = 3, largo = 3, horasDeSol = 7)
+	const parcelaIndustrial = new ParcelaIndustrial(ancho = 3, largo = 3, horasDeSol = 7)
+	const menta = new Menta(altura = 2, cosecha = 2007)
+	const hierbabuena = new Hierbabuena(altura = 1, cosecha = 2007)
+	const quinoa = new Quinoa(altura = 2, cosecha = 2010, horasDeSolQueTolera = 12)
+
+	test "Las parcelas tienen complicaciones cuando alguna de sus plantas no tolera la cantidad de horas de sol que recibe" {
+		parcelaEcologica.plantar(quinoa)
+		assert.notThat(parcelaEcologica.tieneComplicaciones())
+		parcelaEcologica.plantar(menta)
+		assert.that(parcelaEcologica.tieneComplicaciones())
+	}
+
+	test "Si una parcela ecológica no tiene complicaciones y es ideal para una planta, asocia bien" {
+		assert.notThat(parcelaEcologica.tieneComplicaciones())
+		assert.that(hierbabuena.esIdeal(parcelaEcologica))
+		assert.that(parcelaEcologica.asociaBien(hierbabuena))
+	}
+
+	test "Si una parcela ecológica tiene complicaciones no asocia bien" {
+		parcelaEcologica.plantar(menta)
+		assert.that(parcelaEcologica.tieneComplicaciones())
+		assert.notThat(parcelaEcologica.asociaBien(hierbabuena))
+	}
+
+	test "Si una parcela ecológica no es ideal para una planta, aunque no tenga complicaciones, no asocia bien" {
+		parcelaEcologica.plantar(quinoa)
+		assert.notThat(parcelaEcologica.tieneComplicaciones())
+		assert.notThat(quinoa.esIdeal(parcelaEcologica))
+		assert.notThat(parcelaEcologica.asociaBien(quinoa))
+	}
+
+	test "Una parcela industrial no asocia bien si tiene más de dos plantas" {
+		parcelaIndustrial.plantar(menta)
+		parcelaIndustrial.plantar(hierbabuena)
+		parcelaIndustrial.plantar(hierbabuena)
+		assert.notThat(parcelaIndustrial.asociaBien(quinoa))
+	}
+
+	test "Una parcela industrial no asocia bien con una planta que no sea fuerte (>10hs de sol)" {
+		assert.notThat(parcelaIndustrial.asociaBien(menta))
+		assert.that(parcelaIndustrial.asociaBien(quinoa))
+	}
+
+}
+
